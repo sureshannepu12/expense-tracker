@@ -1,0 +1,68 @@
+// Prisma schema: the single source of truth for the database structure.
+// After changing it, run `pnpm db:migrate` to create a migration and regenerate the client.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  categories Category[]
+  expenses   Expense[]
+  budgets    Budget[]
+}
+
+model Category {
+  id     String  @id @default(cuid())
+  name   String
+  color  String  @default("#64748b")
+  icon   String?
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expenses Expense[]
+  budgets  Budget[]
+
+  @@unique([userId, name])
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  /// Amount in the smallest currency unit (cents / paise) to avoid floating point errors.
+  amount      Int
+  description String
+  date        DateTime
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, date])
+}
+
+model Budget {
+  id         String   @id @default(cuid())
+  /// Month in "YYYY-MM" format.
+  month      String
+  /// Budget limit in the smallest currency unit.
+  amount     Int
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, month])
+}

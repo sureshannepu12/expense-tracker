@@ -1,0 +1,16 @@
+{
+  "name": "expense-tracker",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter api --filter web dev",
+    "build": "pnpm --filter api build && pnpm --filter web build",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter api db:migrate",
+    "db:seed": "pnpm --filter api db:seed",
+    "api:gen": "pnpm --filter web api:gen",
+    "lint": "pnpm -r lint",
+    "test": "pnpm --filter api test"
+  },
+  "packageManager": "pnpm@10.11.0"
+}
